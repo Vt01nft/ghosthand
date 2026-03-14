@@ -4,7 +4,7 @@
 
 AI-powered building mentor that sees what you're working on and guides you in real-time. Point your camera at anything - GHOSTHAND identifies it, checks for safety hazards, finds specs, and walks you through step-by-step.
 
-**Category:** Live Agent | **Hackathon:** [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/) `#GeminiLiveAgentChallenge`
+**Category:** Live Agent | **Hackathon:** [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/)
 
 ---
 
