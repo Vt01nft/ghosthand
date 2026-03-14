@@ -1,4 +1,4 @@
-# GHOSTHAND 👋
+# GHOSTHAND
 
 ### Your hands are busy. Your AI isn't.
 
