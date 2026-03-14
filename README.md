@@ -1,6 +1,6 @@
 # GHOSTHAND
 
-### Your hands are busy. Your AI isn't.
+### Your hands are busy Your AI isn't
 
 AI-powered building mentor that sees what you're working on and guides you in real-time. Point your camera at anything - GHOSTHAND identifies it, checks for safety hazards, finds specs, and walks you through step-by-step.
 
