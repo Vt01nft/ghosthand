@@ -2,15 +2,10 @@
 GHOSTHAND — Your hands are busy. Your AI isn't.
 
 3 specialist sub-agents + 1 orchestrator.
-Text + image mode. Use 📎 paperclip to attach photos.
-DO NOT click mic or camera buttons.
-
-Built for: Gemini Live Agent Challenge
-Category: Live Agent
+All custom tools — no google_search to avoid tool mixing errors.
 """
 
 from google.adk.agents import Agent
-from google.adk.tools import google_search
 from . import tools
 
 MODEL = "gemini-2.5-flash"
@@ -43,18 +38,18 @@ guide_agent = Agent(
     tools=[tools.save_progress, tools.get_progress],
 )
 
-# ── LOOKUP: parts expert with Google Search ──
+# ── LOOKUP: parts expert (no external search, uses built-in knowledge) ──
 lookup_agent = Agent(
     name="lookup",
     model=MODEL,
-    description="Parts expert. Identifies components and searches Google for specs, datasheets, prices, and manuals.",
+    description="Parts expert. Identifies components, tools, and materials from images. Provides specs, datasheets, prices, and where to buy.",
     instruction="""You are LOOKUP, the parts expert.
 - Identify components, tools, and materials from images
-- Use Google Search for datasheets, specs, prices, where to buy
+- Provide specs, datasheets, typical prices
 - Read model numbers, labels, color bands on resistors
-- Give prices in USD
+- Suggest where to buy replacement parts
+- Give prices in USD when possible
 - Be SHORT. Name, spec, price. Done.""",
-    tools=[google_search],
 )
 
 # ── GHOSTHAND: orchestrator ──
@@ -67,7 +62,7 @@ root_agent = Agent(
 You have 3 specialists — delegate to the right one:
 - SPOTTER: safety checks (USE FIRST on every new image)
 - GUIDE: step-by-step instructions and progress tracking
-- LOOKUP: identify parts, find specs/prices via Google Search
+- LOOKUP: identify parts, find specs and prices
 
 RULES:
 1. On EVERY new image, check safety with SPOTTER first.
