@@ -2,7 +2,7 @@
 
 ### Your hands are busy. Your AI isn't.
 
-AI-powered building mentor that sees what you're working on and guides you in real-time. Upload a photo of anything — GHOSTHAND identifies it, checks for safety hazards, finds specs, and walks you through step-by-step.
+AI-powered building mentor that sees what you're working on and guides you in real-time. Upload a photo of anything - GHOSTHAND identifies it, checks for safety hazards, finds specs, and walks you through step-by-step.
 
 **Category:** Live Agent | **Hackathon:** [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/) `#GeminiLiveAgentChallenge`
 
@@ -102,7 +102,7 @@ Upload a photo of what you're building. GHOSTHAND runs it through 3 specialist a
 | **GUIDE** | Instructor | `save_progress`, `get_progress` | Step-by-step guidance with progress tracking |
 | **LOOKUP** | Parts Expert | `Google Search` | Identifies components, finds specs and prices |
 
-All three coordinate through one orchestrator — like having an experienced mentor looking over your shoulder.
+All three coordinate through one orchestrator - like having an experienced mentor looking over your shoulder.
 
 ## Architecture
 
@@ -160,9 +160,9 @@ ghosthand/
 ## Key Design Decisions
 
 1. **Tool separation**: Each sub-agent has only one tool type (custom OR Google Search) to comply with Gemini's tool-mixing constraints.
-2. **No tools on orchestrator**: The root agent only has `sub_agents`, no direct tools — preventing routing conflicts.
+2. **No tools on orchestrator**: The root agent only has `sub_agents`, no direct tools - preventing routing conflicts.
 3. **Safety-first routing**: SPOTTER checks every image before other agents respond.
-4. **Gemini 2.5 Flash**: Chosen for speed — responds in 2-5 seconds with full vision understanding.
+4. **Gemini 2.5 Flash**: Chosen for speed - responds in 2-5 seconds with full vision understanding.
 
 ## License
 
