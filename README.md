@@ -1,38 +1,24 @@
 # GHOSTHAND
 
-### Your hands are busy Your AI isn't
+### Your hands are busy. Your AI isn't.
 
-AI-powered building mentor that sees what you're working on and guides you in real-time. Point your camera at anything - GHOSTHAND identifies it, checks for safety hazards, finds specs, and walks you through step-by-step.
+AI-powered building mentor that sees what you're working on and guides you in real-time. Upload a photo of anything — GHOSTHAND identifies it, checks for safety hazards, finds specs, and walks you through step-by-step.
 
-**Category:** Live Agent | **Hackathon:** [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/)
+**Category:** Live Agent | **Hackathon:** [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/) `#GeminiLiveAgentChallenge`
+
+**Live Deployment:** [https://ghosthand-205219287826.us-central1.run.app](https://ghosthand-205219287826.us-central1.run.app)
 
 ---
 
-## How It Works
-
-Upload a photo of what you're building. GHOSTHAND runs it through 3 specialist agents:
-
-| Agent | Role | What It Does |
-|-------|------|-------------|
-| **SPOTTER** | Safety Monitor | Proactively warns about wrong wiring, exposed components, hazards |
-| **GUIDE** | Instructor | Step-by-step guidance with progress tracking |
-| **LOOKUP** | Parts Expert | Identifies components, finds specs and prices via Google Search |
-
-All three coordinate through one natural voice - like having an experienced mentor looking over your shoulder.
-
-## Demo
-
-![GHOSTHAND identifying a voltage tester](https://via.placeholder.com/800x400?text=Demo+Screenshot)
-
-> *"You're holding a Voltage Tester - the GERMANY 220-250V marking means it detects AC voltage in the 220-250 volt range. You also have keys on a ROYALTON keyring."*
-
-## Quick Start
+## Reproducible Testing Instructions
 
 ### Prerequisites
-- Python 3.11+
-- Google Cloud account with Vertex AI enabled
 
-### Setup
+- Python 3.11+
+- A Google Cloud project with **Vertex AI API** enabled
+- `gcloud` CLI installed and authenticated
+
+### Step 1: Clone and install
 
 ```bash
 git clone https://github.com/Vt01nft/ghosthand.git
@@ -43,27 +29,80 @@ source .venv/bin/activate        # Mac/Linux
 pip install -r requirements.txt
 ```
 
-### Configure
+### Step 2: Configure your Google Cloud credentials
 
-Create `ghosthand/.env`:
-```
-GOOGLE_GENAI_USE_VERTEXAI=TRUE
-GOOGLE_CLOUD_PROJECT=your-project-id
-GOOGLE_CLOUD_LOCATION=us-central1
-```
-
-Authenticate:
 ```bash
 gcloud auth application-default login
 ```
 
-### Run
+Edit `ghosthand/.env` with your project details:
+
+```
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=your-gcp-project-id
+GOOGLE_CLOUD_LOCATION=us-central1
+```
+
+### Step 3: Run locally
 
 ```bash
 adk web --no-reload
 ```
 
-Open http://localhost:8000 → select **ghosthand** → click 📎 to attach a photo → type your question.
+Open **http://localhost:8000** in Chrome.
+
+### Step 4: Test it
+
+1. Select **ghosthand** from the dropdown (top-left)
+2. Click **+ New Session** (top-right)
+3. Click the **📎 paperclip** icon next to the message box
+4. Upload any photo (a tool, electronic component, wires, anything)
+5. Type: **"What is this?"** and press Enter
+6. GHOSTHAND will identify objects, read text, and check for safety hazards
+
+### Example test prompts
+
+| Upload | Type this |
+|--------|-----------|
+| Photo of any tool | "What am I holding?" |
+| Photo of wires | "Is this safe to work with?" |
+| No photo needed | "How do I wire a basic light switch?" |
+| No photo needed | "What's next?" (after a previous instruction) |
+| Photo of any component | "What is this and where can I buy one?" |
+
+### Step 5: Deploy to Google Cloud Run (optional)
+
+```bash
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com aiplatform.googleapis.com
+
+gcloud artifacts repositories create ghosthand-repo --repository-format=docker --location=us-central1
+
+gcloud builds submit --tag us-central1-docker.pkg.dev/YOUR_PROJECT/ghosthand-repo/ghosthand:latest
+
+gcloud run deploy ghosthand \
+  --image us-central1-docker.pkg.dev/YOUR_PROJECT/ghosthand-repo/ghosthand:latest \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 8000 \
+  --memory 1Gi \
+  --cpu 2 \
+  --set-env-vars "GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=YOUR_PROJECT,GOOGLE_CLOUD_LOCATION=us-central1"
+```
+
+---
+
+## How It Works
+
+Upload a photo of what you're building. GHOSTHAND runs it through 3 specialist agents:
+
+| Agent | Role | Tools | What It Does |
+|-------|------|-------|-------------|
+| **SPOTTER** | Safety Monitor | `check_safety` | Proactively warns about wrong wiring, exposed components, hazards |
+| **GUIDE** | Instructor | `save_progress`, `get_progress` | Step-by-step guidance with progress tracking |
+| **LOOKUP** | Parts Expert | `Google Search` | Identifies components, finds specs and prices |
+
+All three coordinate through one orchestrator — like having an experienced mentor looking over your shoulder.
 
 ## Architecture
 
@@ -73,57 +112,57 @@ User (Browser)
   ├── 📎 Upload photo + type question
   │
   ▼
-ADK Web Server (adk web)
+ADK Web Server (Google ADK)
   │
   ▼
-GHOSTHAND Orchestrator (gemini-2.5-flash)
-  ├── SPOTTER (safety check) ← check_safety tool
-  ├── GUIDE (instructions) ← save_progress, get_progress tools
-  └── LOOKUP (parts expert) ← Google Search tool
+GHOSTHAND Orchestrator (gemini-2.5-flash on Vertex AI)
+  ├── SPOTTER (safety)     → check_safety custom tool
+  ├── GUIDE (instructions) → save_progress, get_progress custom tools
+  └── LOOKUP (parts)       → Google Search tool
   │
   ▼
-Vertex AI (Gemini 2.5 Flash) on Google Cloud
+Google Cloud: Vertex AI (inference) + Cloud Run (hosting)
 ```
 
 ## Tech Stack
 
-- **Agent Framework:** Google ADK 1.26 (Agent Development Kit)
+- **Agent Framework:** Google ADK (Agent Development Kit)
 - **Model:** Gemini 2.5 Flash via Vertex AI
 - **Search:** Google Search tool for grounded facts
 - **Custom Tools:** Safety checker, progress tracker
-- **Deployment:** Google Cloud Run
+- **Deployment:** Google Cloud Run + Artifact Registry + Cloud Build
 - **Language:** Python 3.11+
 
 ## Google Cloud Services Used
 
-- **Vertex AI** - Gemini model inference
-- **Cloud Run** - Application hosting
-- **Artifact Registry** - Container storage
-- **Cloud Build** - CI/CD pipeline
+| Service | Purpose |
+|---------|---------|
+| **Vertex AI** | Gemini 2.5 Flash model inference |
+| **Cloud Run** | Application hosting |
+| **Artifact Registry** | Docker container storage |
+| **Cloud Build** | CI/CD pipeline for building containers |
 
 ## Project Structure
 
 ```
 ghosthand/
 ├── ghosthand/           # ADK agent package
-│   ├── __init__.py      # Package init
+│   ├── __init__.py      # Package init (from . import agent)
 │   ├── agent.py         # 3 sub-agents + orchestrator
-│   ├── tools.py         # Safety checker, progress tracker
+│   ├── tools.py         # check_safety, save_progress, get_progress
 │   └── .env             # Vertex AI config
-├── requirements.txt
-├── Dockerfile
+├── Dockerfile           # Cloud Run container
+├── requirements.txt     # Python dependencies
 ├── README.md
 └── .gitignore
 ```
 
-## Examples
+## Key Design Decisions
 
-| You show | You ask | GHOSTHAND says |
-|----------|---------|---------------|
-| Voltage tester | "What's in my hand?" | "That's a voltage tester rated for 220-250V AC. The GERMANY marking means it's European standard." |
-| Tangled wires | "Is this safe?" | "Heads up - those exposed copper ends could short. Wrap them with electrical tape before reconnecting." |
-| Circuit board | "What component is this?" | "That's a 470μF electrolytic capacitor. Make sure the negative stripe faces the minus terminal." |
-| Any project | "What's next?" | Checks your saved progress and tells you the next step |
+1. **Tool separation**: Each sub-agent has only one tool type (custom OR Google Search) to comply with Gemini's tool-mixing constraints.
+2. **No tools on orchestrator**: The root agent only has `sub_agents`, no direct tools — preventing routing conflicts.
+3. **Safety-first routing**: SPOTTER checks every image before other agents respond.
+4. **Gemini 2.5 Flash**: Chosen for speed — responds in 2-5 seconds with full vision understanding.
 
 ## License
 
